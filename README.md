@@ -10,6 +10,8 @@ bezier = BezierKit.CreateBezier(ctrlpts)
 ## sample2: plot a bezier
 bezier.Plot()
 
+![img.png](demoPic.png)
+
 ## sample3: evaluate the curve at single u
 u = 0.1
 
