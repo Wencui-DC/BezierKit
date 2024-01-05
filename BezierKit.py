@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 # Bernstein class
 class Bernstein:
     @staticmethod
-    # calculate the bernstein polynomial
+    # calculate the bernstein polynomial 
     def BernsteinPoly(i, p, u):
         if 0 <= i <= p:
             return math.comb(p, i) * math.pow(u, i) * math.pow(1 - u, p - i)
