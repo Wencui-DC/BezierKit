@@ -2,6 +2,20 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+# global variables
+abscissae = [0,	-0.201194093997435,	0.201194093997435,
+             -0.394151347077563, 0.394151347077563,	-0.570972172608539,
+             0.570972172608539,	-0.724417731360170,	0.724417731360170,
+             -0.848206583410427, 0.848206583410427, -0.937273392400706,
+             0.937273392400706,-0.987992518020485, 0.987992518020485]
+
+weights = [0.202578241925561, 0.198431485327112, 0.198431485327112,
+           0.186161000015562, 0.186161000015562, 0.166269205816994,
+           0.166269205816994, 0.139570677926154, 0.139570677926154,
+           0.107159220467172, 0.107159220467172, 0.0703660474881081,
+           0.0703660474881081, 0.0307532419961173, 0.0307532419961173]
+
+
 # Bernstein class
 class Bernstein:
     @staticmethod
@@ -30,8 +44,8 @@ class Bernstein:
         return derB * factor
 
 
-# bezier class
-class CreateBezier(Bernstein):
+# Bezier class
+class Bezier(Bernstein):
     def __init__(self, ctrlpts):
         super().__init__()
         self.ctrlpts = np.matrix(ctrlpts)
@@ -39,13 +53,15 @@ class CreateBezier(Bernstein):
         self.space = len(ctrlpts[0])
         self.sampleSize = 50
 
+
     # evaluate a Bezier curve a single u
-    def Evaluated(self, u):
+    def Evaluate(self, u):
         curvePt = 0
         for i in range(self.p + 1):
             curvePt += Bernstein.BernsteinPoly(i, self.p, u) * self.ctrlpts[i, :]
 
         return curvePt
+
 
     # calculate the order-th derivative of a bezier curve at designated u
     def Derivative(self, u, order):
@@ -64,9 +80,34 @@ class CreateBezier(Bernstein):
         U = np.arange(0, 1 + step, step)
         trace = np.zeros((self.sampleSize, self.space))
         for i in range(self.sampleSize):
-            trace[i, :] = self.Evaluated(U[i])
+            trace[i, :] = self.Evaluate(U[i])
 
         return trace
+
+
+    # @brief: calculate the arc length of the bezier curve
+    # @a: the lower bound of parameter u \in [0,1]
+    # @b: the higher bound of parameter u \in [0,1]
+    # @return: the arc length
+    def Length(self, a, b):
+        if a<0 and b>1:
+            raise ValueError('Interval of U is not within [0, 1]')
+
+        coef_1 = (b - a) / 2
+        coef_2 = (b + a) / 2
+        Len = 0
+        abscissaeLen = 15
+        for i in range(abscissaeLen):
+            u = coef_1 * abscissae[i] + coef_2
+            firstDer = self.Derivative(u, 1)
+            normSquare = 0
+            for j in range(self.space):
+                normSquare += firstDer[0, j] ** 2
+
+            Len += weights[i] * math.sqrt(normSquare)
+
+        return Len * coef_1
+
 
     # plot a bezier
     def Plot(self):
