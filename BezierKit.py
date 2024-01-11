@@ -16,11 +16,11 @@ weights = [0.202578241925561, 0.198431485327112, 0.198431485327112,
            0.0703660474881081, 0.0307532419961173, 0.0307532419961173]
 
 
-# Bernstein class
-class Bernstein:
+# bernstein class
+class bernstein:
     @staticmethod
     # calculate the bernstein polynomial 
-    def BernsteinPoly(i, p, u):
+    def bernsteinPoly(i, p, u):
         if 0 <= i <= p:
             return math.comb(p, i) * math.pow(u, i) * math.pow(1 - u, p - i)
         else:
@@ -28,14 +28,14 @@ class Bernstein:
 
     @staticmethod
     # calculate the derivative of bernstein polynomial
-    def Derivative(i, p, u, order):
+    def derivative(i, p, u, order):
         derB = 0
         factor = 1
         degree = p - order
         for m in range(order + 1):
             j = i - order + m
             if (j >= 0) and (j <= degree):
-                derB += math.pow(-1, m) * math.comb(order, m) * Bernstein.BernsteinPoly(j, degree, u)
+                derB += math.pow(-1, m) * math.comb(order, m) * bernstein.bernsteinPoly(j, degree, u)
 
         if (derB != 0) and (order >= 1):
             for j in range(order):
@@ -44,8 +44,8 @@ class Bernstein:
         return derB * factor
 
 
-# Bezier class
-class Bezier(Bernstein):
+# bezier class
+class bezier(bernstein):
     def __init__(self, ctrlpts):
         super().__init__()
         self.ctrlpts = np.matrix(ctrlpts)
@@ -54,33 +54,33 @@ class Bezier(Bernstein):
         self.sampleSize = 50
 
 
-    # evaluate a Bezier curve a single u
-    def Evaluate(self, u):
+    # evaluate a bezier curve a single u
+    def evaluate(self, u):
         curvePt = 0
         for i in range(self.p + 1):
-            curvePt += Bernstein.BernsteinPoly(i, self.p, u) * self.ctrlpts[i, :]
+            curvePt += bernstein.bernsteinPoly(i, self.p, u) * self.ctrlpts[i, :]
 
         return curvePt
 
 
     # calculate the order-th derivative of a bezier curve at designated u
-    def Derivative(self, u, order):
+    def derivative(self, u, order):
         if order < 0:
-            raise ValueError('Derivative order must be >= 0')
+            raise ValueError('derivative order must be >= 0')
 
-        BezierDer = 0
+        bezierDer = 0
         for i in range(self.p + 1):
-            BezierDer += Bernstein.Derivative(i, self.p, u, order) * self.ctrlpts[i, :]
+            bezierDer += bernstein.derivative(i, self.p, u, order) * self.ctrlpts[i, :]
 
-        return BezierDer
+        return bezierDer
 
     # calculate the trace of a bezier curve
-    def Trace(self):
+    def trace(self):
         step = 1 / (self.sampleSize - 1)
         U = np.arange(0, 1 + step, step)
         trace = np.zeros((self.sampleSize, self.space))
         for i in range(self.sampleSize):
-            trace[i, :] = self.Evaluate(U[i])
+            trace[i, :] = self.evaluate(U[i])
 
         return trace
 
@@ -89,7 +89,7 @@ class Bezier(Bernstein):
     # @a: the lower bound of parameter u \in [0,1]
     # @b: the higher bound of parameter u \in [0,1]
     # @return: the arc length
-    def Length(self, a, b):
+    def length(self, a, b):
         if a<0 and b>1:
             raise ValueError('Interval of U is not within [0, 1]')
 
@@ -99,7 +99,7 @@ class Bezier(Bernstein):
         abscissaeLen = 15
         for i in range(abscissaeLen):
             u = coef_1 * abscissae[i] + coef_2
-            firstDer = self.Derivative(u, 1)
+            firstDer = self.derivative(u, 1)
             normSquare = 0
             for j in range(self.space):
                 normSquare += firstDer[0, j] ** 2
@@ -110,8 +110,8 @@ class Bezier(Bernstein):
 
 
     # plot a bezier
-    def Plot(self):
-        trace = self.Trace()
+    def plot(self):
+        trace = self.trace()
         fig = plt.figure()
         if self.space == 2:
             x = np.array(self.ctrlpts[:, 0])
@@ -119,6 +119,9 @@ class Bezier(Bernstein):
             plt.plot(trace[:, 0], trace[:, 1], color='black')
             plt.scatter(x, y, s=50, marker='o', color='blue')
             plt.plot(x, y, linestyle='dashed', color='blue', linewidth=1)
+            plt.xlabel('x')
+            plt.ylabel('y')
+            plt.axis('equal')
         elif self.space == 3:
             x = np.array(self.ctrlpts[:, 0])
             y = np.array(self.ctrlpts[:, 1])
@@ -127,10 +130,14 @@ class Bezier(Bernstein):
             ax.plot(trace[:, 0], trace[:, 1], trace[:, 2], color='black')
             ax.scatter(x, y, z, s=50, marker='o', color='blue')
             ax.plot(x, y, z, linestyle='dashed', color='blue', linewidth=1)
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
+            ax.set_zlabel('z')
+            ax.set_box_aspect([1.0, 1.0, 1.0])
         else:
-            raise ValueError('Bezier.space is neither 2 nor 3!')
+            raise ValueError('bezier.space is neither 2 nor 3!')
 
-        plt.title(f'a Bezier curve with degree of {self.p}')
+        plt.title(f'a bezier curve with degree of {self.p}')
         plt.show()
 
         return 0
