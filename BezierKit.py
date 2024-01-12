@@ -2,7 +2,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-# global variables
+# global variables for Legendre-Gauss quadrature
 abscissae = [0,	-0.201194093997435,	0.201194093997435,
              -0.394151347077563, 0.394151347077563,	-0.570972172608539,
              0.570972172608539,	-0.724417731360170,	0.724417731360170,
