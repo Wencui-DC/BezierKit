@@ -48,10 +48,10 @@ class bernstein:
 class bezier(bernstein):
     def __init__(self, ctrlpts):
         super().__init__()
-        self.ctrlpts = np.matrix(ctrlpts)
-        self.p = len(ctrlpts)-1
-        self.space = len(ctrlpts[0])
-        self.sampleSize = 50
+        self.ctrlpts = np.matrix(ctrlpts) # the control points
+        self.p = len(ctrlpts)-1 # bezier curve's degree
+        self.dimension = len(ctrlpts[0]) # It is either 3 or 2.
+        self.sampleSize = 50 # default number of interpolation steps
 
 
     # evaluate a bezier curve a single u
@@ -74,11 +74,12 @@ class bezier(bernstein):
 
         return bezierDer
 
+
     # calculate the trace of a bezier curve
     def trace(self):
         step = 1 / (self.sampleSize - 1)
         U = np.arange(0, 1 + step, step)
-        trace = np.zeros((self.sampleSize, self.space))
+        trace = np.zeros((self.sampleSize, self.dimension))
         for i in range(self.sampleSize):
             trace[i, :] = self.evaluate(U[i])
 
@@ -89,7 +90,7 @@ class bezier(bernstein):
     # @a: the lower bound of parameter u \in [0,1]
     # @b: the higher bound of parameter u \in [0,1]
     # @return: the arc length
-    def length(self, a, b):
+    def length(self, a=0, b=1):
         if a<0 and b>1:
             raise ValueError('Interval of U is not within [0, 1]')
 
@@ -101,7 +102,7 @@ class bezier(bernstein):
             u = coef_1 * abscissae[i] + coef_2
             firstDer = self.derivative(u, 1)
             normSquare = 0
-            for j in range(self.space):
+            for j in range(self.dimension):
                 normSquare += firstDer[0, j] ** 2
 
             Len += weights[i] * math.sqrt(normSquare)
@@ -113,7 +114,7 @@ class bezier(bernstein):
     def plot(self):
         trace = self.trace()
         fig = plt.figure()
-        if self.space == 2:
+        if self.dimension == 2:
             x = np.array(self.ctrlpts[:, 0])
             y = np.array(self.ctrlpts[:, 1])
             plt.plot(trace[:, 0], trace[:, 1], color='black')
@@ -122,7 +123,7 @@ class bezier(bernstein):
             plt.xlabel('x')
             plt.ylabel('y')
             plt.axis('equal')
-        elif self.space == 3:
+        elif self.dimension == 3:
             x = np.array(self.ctrlpts[:, 0])
             y = np.array(self.ctrlpts[:, 1])
             z = np.array(self.ctrlpts[:, 2])
@@ -135,7 +136,7 @@ class bezier(bernstein):
             ax.set_zlabel('z')
             ax.set_box_aspect([1.0, 1.0, 1.0])
         else:
-            raise ValueError('bezier.space is neither 2 nor 3!')
+            raise ValueError('bezier.dimension is neither 2 nor 3!')
 
         plt.title(f'a bezier curve with degree of {self.p}')
         plt.show()
