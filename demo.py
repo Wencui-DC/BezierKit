@@ -2,10 +2,10 @@ import BezierKit
 
 ## sample1: create a bezier curve
 # 3D bezier
-ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
+# ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
 
-# 2D bezier (approximately a circle)
-# ctrlpts = ([0, 1.00005519], [0.55342686, 0.99873585], [0.99873585, 0.55342686], [1.00005519, 0])
+# 2D bezier (approximately a unit circle)
+ctrlpts = ([0, 1.00005519], [0.55342686, 0.99873585], [0.99873585, 0.55342686], [1.00005519, 0])
 
 
 # create a bezier

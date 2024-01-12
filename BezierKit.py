@@ -91,7 +91,7 @@ class bezier(bernstein):
     # @b: the higher bound of parameter u \in [0,1]
     # @return: the arc length
     def length(self, a=0, b=1):
-        if a<0 and b>1:
+        if a<0 or b>1:
             raise ValueError('Interval of U is not within [0, 1]')
 
         coef_1 = (b - a) / 2
