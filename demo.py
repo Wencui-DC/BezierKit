@@ -2,10 +2,10 @@ import BezierKit
 
 ## sample1: create a bezier curve
 # 3D bezier
-# ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
+ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
 
 # 2D bezier (approximately a unit circle)
-ctrlpts = ([0, 1.00005519], [0.55342686, 0.99873585], [0.99873585, 0.55342686], [1.00005519, 0])
+# ctrlpts = ([0, 1.00005519], [0.55342686, 0.99873585], [0.99873585, 0.55342686], [1.00005519, 0])
 
 
 # create a bezier
@@ -32,6 +32,7 @@ else:
 
 
 ## sample5: calculate the order-th derivative of a bezier curve
+u = 0.23
 order = 5
 for i in range(order + 1):
     der = bezier.derivative(u, i)
@@ -48,3 +49,9 @@ Len = bezier.length()
 print("The arc length is %.10f" % Len)
 # The default parameter a and b are 0 and 1. You can adjust them within [0, 1],
 # for example: Len = bezier.length(0.5, 1)
+
+
+## sample7: calculate the curve's curvature
+u = 0.23
+k = bezier.curvature(u)
+print("The curvature at %.2f is %.4f" % (u, k))

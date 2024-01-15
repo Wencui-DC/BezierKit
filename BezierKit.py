@@ -110,6 +110,15 @@ class bezier(bernstein):
         return Len * coef_1
 
 
+    # calculate the curvature at u
+    def curvature(self, u):
+        firstDer = self.derivative(u, 1)
+        secondDer = self.derivative(u, 2)
+        k = np.linalg.norm(np.cross(firstDer, secondDer)) / np.linalg.norm(firstDer)**3
+
+        return k
+
+
     # plot a bezier
     def plot(self):
         trace = self.trace()
