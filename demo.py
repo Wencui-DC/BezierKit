@@ -13,7 +13,7 @@ bezier = BezierKit.bezier(ctrlpts)
 
 
 ## sample2: plot a bezier
-bezier.plot()
+bezier.vis()
 
 
 ## sample3: calculate the trace of the bezier

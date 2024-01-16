@@ -26,22 +26,21 @@ class bernstein:
         else:
             return 0
 
+
     @staticmethod
     # calculate the derivative of bernstein polynomial
     def derivative(i, p, u, order):
         derB = 0
-        factor = 1
         degree = p - order
         for m in range(order + 1):
             j = i - order + m
             if (j >= 0) and (j <= degree):
                 derB += math.pow(-1, m) * math.comb(order, m) * bernstein.bernsteinPoly(j, degree, u)
 
-        if (derB != 0) and (order >= 1):
-            for j in range(order):
-                factor *= (p - j)
+        if derB != 0 and order > 0:
+            derB *= math.perm(p, order)
 
-        return derB * factor
+        return derB
 
 
 # bezier class
@@ -86,7 +85,7 @@ class bezier(bernstein):
         return trace
 
 
-    # @brief: calculate the arc length of the bezier curve
+    # @brief: calculate the arc length of the bezier curve, using Legendre-Gauss quadrature
     # @a: the lower bound of parameter u \in [0,1]
     # @b: the higher bound of parameter u \in [0,1]
     # @return: the arc length
@@ -120,7 +119,7 @@ class bezier(bernstein):
 
 
     # plot a bezier
-    def plot(self):
+    def vis(self):
         trace = self.trace()
         fig = plt.figure()
         if self.dimension == 2:
