@@ -31,11 +31,11 @@ class bernstein:
     # calculate the derivative of bernstein polynomial
     def derivative(i, p, u, order):
         derB = 0
-        degree = p - order
-        for m in range(order + 1):
-            j = i - order + m
-            if (j >= 0) and (j <= degree):
-                derB += math.pow(-1, m) * math.comb(order, m) * bernstein.bernsteinPoly(j, degree, u)
+        newP = p - order
+        for j in range(order + 1):
+            newI = i - order + j
+            if (newI >= 0) and (newI <= newP):
+                derB += math.pow(-1, j) * math.comb(order, j) * bernstein.bernsteinPoly(newI, newP, u)
 
         if derB != 0 and order > 0:
             derB *= math.perm(p, order)

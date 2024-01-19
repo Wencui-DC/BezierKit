@@ -32,7 +32,7 @@ else:
 
 
 ## sample5: calculate the order-th derivative of a bezier curve
-u = 0.23
+u = 0.2
 order = 5
 for i in range(order + 1):
     der = bezier.derivative(u, i)
@@ -45,7 +45,7 @@ for i in range(order + 1):
 
 
 ## sample6: calculate the length of the curve
-Len = bezier.length()
+Len = bezier.length(0,0.1)
 print("The arc length is %.10f" % Len)
 # The default parameter a and b are 0 and 1. You can adjust them within [0, 1],
 # for example: Len = bezier.length(0.5, 1)
@@ -55,3 +55,6 @@ print("The arc length is %.10f" % Len)
 u = 0.23
 k = bezier.curvature(u)
 print("The curvature at %.2f is %.4f" % (u, k))
+
+
+
