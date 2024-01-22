@@ -47,18 +47,19 @@ class bernstein:
     def pStarDer(weights, ctrlpts, p, u, order):
         derivative = 0.0
         for i in range(p+1):
-            derivative += weights[i]* bernstein.derivative(i, p, u, order) * ctrlpts[i,:]
+            derivative += weights[i] * bernstein.derivative(i, p, u, order) * ctrlpts[i,:]
 
         return derivative
 
 
     @staticmethod
     def wDer(weights, p, u, order):
-        derivative = 0
+        derivative = 0.0
         for i in range(p+1):
             derivative += weights[i] * bernstein.derivative(i, p, u, order)
 
         return derivative
+
 
 class visualization:
     @staticmethod
@@ -111,8 +112,8 @@ class bezier(bernstein, visualization):
 
     # evaluate a bezier curve a single u
     def evaluate(self, u):
-        curvePt = 0
-        sumWeights = 0
+        curvePt = 0.0
+        sumWeights = 0.0
         for i in range(self.p + 1):
             weightTimesBernstein = self.weights[i] * bernstein.bernsteinPoly(i, self.p, u)
             sumWeights += weightTimesBernstein
@@ -128,7 +129,7 @@ class bezier(bernstein, visualization):
         if order < 0:
             raise ValueError('derivative order must be >= 0')
 
-        bezierDer = 0
+        bezierDer = 0.0
         if sum(self.weights) == self.p+1:
             for i in range(self.p + 1):
                 bezierDer += bernstein.derivative(i, self.p, u, order) * self.ctrlpts[i, :]
