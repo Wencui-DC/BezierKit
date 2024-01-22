@@ -98,7 +98,6 @@ class visualization:
         return 0
 
 
-
 # bezier class, including the rational bezier feature
 class bezier(bernstein, visualization):
     def __init__(self, ctrlpts):
@@ -129,17 +128,29 @@ class bezier(bernstein, visualization):
         if order < 0:
             raise ValueError('derivative order must be >= 0')
 
-        bezierDer = 0.0
         if sum(self.weights) == self.p+1:
+            bezierDer = 0.0
             for i in range(self.p + 1):
                 bezierDer += bernstein.derivative(i, self.p, u, order) * self.ctrlpts[i, :]
         else:
-            for j in range(order):
-                i = j+1
-                bezierDer += -math.comb(order,i) * self.derivative(u, order-i) * bernstein.wDer(self.weights, self.p, u, i)
+            m = self.p+1
+            wDerRecord = np.zeros([m, 1])
+            pStarDerRecrod = np.zeros([m, self.dimension])
+            bezierDer = np.zeros([order+1, self.dimension])
+            for i in range(m):
+                wDerRecord[i, 0] = bernstein.wDer(self.weights, self.p, u, i)
+                pStarDerRecrod[i, :] = bernstein.pStarDer(self.weights, self.ctrlpts, self.p, u, i)
 
-            bezierDer += bernstein.pStarDer(self.weights, self.ctrlpts, self.p, u, order)
-            bezierDer /= bernstein.wDer(self.weights, self.p, u, 0)
+            for j in range(order+1):
+                for i in range(j):
+                    m = j - i
+                    if m <= self.p:
+                        bezierDer[j, :] += -math.comb(j, m) * bezierDer[i,:] * wDerRecord[m, 0]
+
+                if 0 <= j <= self.p:
+                    bezierDer[j, :] += pStarDerRecrod[j, :]
+
+                bezierDer[j, :] /= wDerRecord[0, 0]
 
         return bezierDer
 

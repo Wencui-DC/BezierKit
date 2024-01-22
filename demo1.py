@@ -1,6 +1,6 @@
 import BezierKit
 import math
-
+import numpy as np
 ## sample1: create a bezier curve
 # 3D bezier
 ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
@@ -12,8 +12,19 @@ u = 0.1
 # pt = rationB.evaluate(u)
 # print(pt)
 
-# show the order-th derivative
-order = 8
+# order = 8
+# wDerRecord = np.zeros([order, 1])
+# pStarDerRecrod = np.zeros([order, rationB.dimension])
+# for j in range(order):
+#     i = j + 1
+#     wDerRecord[j, 0] = BezierKit.bernstein.wDer(rationB.weights, rationB.p, u, i)
+#     pStarDerRecrod[j, :] = BezierKit.bernstein.pStarDer(rationB.weights, rationB.ctrlpts, rationB.p, u, i)
+#
+# print(pStarDerRecrod)
+# print(wDerRecord)
+
+# # show the order-th derivative
+order = 20
+der = rationB.derivative(u, order)
 for i in range(order+1):
-    der = rationB.derivative(u, i)
-    print('The %d-order derivative of C(%.2f) =[%.4f, %.4f, %.4f]' % (i, u, der[0,0], der[0,1], der[0,2]))
+    print('The %d-order derivative of C(%.2f) =[%.4f, %.4f, %.4f]' % (i, u, der[i, 0], der[i, 1], der[i, 2]))
