@@ -134,21 +134,22 @@ class bezier(bernstein, visualization):
                 bezierDer += bernstein.derivative(i, self.p, u, order) * self.ctrlpts[i, :]
         else:
             m = self.p+1
+            n = order+1
             wDerRecord = np.zeros([m, 1])
             pStarDerRecrod = np.zeros([m, self.dimension])
-            bezierDer = np.zeros([order+1, self.dimension])
+            bezierDer = np.zeros([n, self.dimension])
             for i in range(m):
                 wDerRecord[i, 0] = bernstein.wDer(self.weights, self.p, u, i)
                 pStarDerRecrod[i, :] = bernstein.pStarDer(self.weights, self.ctrlpts, self.p, u, i)
 
-            for j in range(order+1):
-                for i in range(j):
-                    m = j - i
-                    if m <= self.p:
-                        bezierDer[j, :] += -math.comb(j, m) * bezierDer[i,:] * wDerRecord[m, 0]
-
+            for j in range(n):
                 if 0 <= j <= self.p:
                     bezierDer[j, :] += pStarDerRecrod[j, :]
+
+                for i in range(j):
+                    m = j - i
+                    if 1 <= m <= self.p:
+                        bezierDer[j, :] += -math.comb(j, m) * bezierDer[i,:] * wDerRecord[m, 0]
 
                 bezierDer[j, :] /= wDerRecord[0, 0]
 

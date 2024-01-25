@@ -24,7 +24,7 @@ u = 0.1
 # print(wDerRecord)
 
 # # show the order-th derivative
-order = 20
+order = 15
 der = rationB.derivative(u, order)
 for i in range(order+1):
     print('The %d-order derivative of C(%.2f) =[%.4f, %.4f, %.4f]' % (i, u, der[i, 0], der[i, 1], der[i, 2]))
