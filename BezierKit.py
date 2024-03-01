@@ -184,7 +184,7 @@ class bezier(bernstein, visualization):
             firstDer = self.derivative(u, 1)
             normSquare = 0
             for j in range(self.dimension):
-                normSquare += firstDer[0, j] ** 2
+                normSquare += firstDer[-1, j] ** 2
 
             Len += weights_LG[i] * math.sqrt(normSquare)
 
