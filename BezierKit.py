@@ -210,3 +210,76 @@ class bezier(bernstein, visualization):
             raise ValueError('bezier.dimension is neither 2 nor 3!')
 
         return 0
+
+
+class basis:
+    #@brief: find the index of u_i for u
+    #@n: the number of ctrlpts
+    #@p: the curve degree
+    #@u: the parameter u
+    #@U: the knots vector
+    @staticmethod
+    def findSpan(n, p, u, U):
+        if u == U[n + 1]:
+            return n
+
+        low = p
+        high = n + 1
+        index = (low + high) // 2
+        while u < U[index] or u >= U[index + 1]:
+            if u < U[index]:
+                high = index
+            else:
+                low = index
+
+            index = (low + high) // 2
+
+        return index
+
+
+    #@brief: calculate the basis function
+    #@i: the index of u_i for u
+    #@p: the curve degree
+    #@u: the parameter u
+    #@U: the knots vector
+    @staticmethod
+    def basisFun(i, p, u, U):
+        N = np.ones([p+1, 1])
+        left = np.zeros([p, 1])
+        right = np.zeros([p, 1])
+        for j in range(1, p+1):
+            left[j-1, 0] = u - U[i+1-j]
+            right[j-1, 0] = U[i+j] - u
+            saved = 0.0;
+            for r in range(j):
+                temp = N[r, 0] / (right[r, 0] + left[j-r-1, 0])
+                N[r, 0] = saved + right[r, 0] * temp
+                saved = left[j-r-1, 0] * temp
+
+            N[j, 0] = saved
+
+        return N
+
+
+
+
+class nurbs(basis):
+    def __init__(self, ctrlpts, knots, weights, degree):
+        super().__init__()
+        self.ctrlpts = np.matrix(ctrlpts)
+        self.U = knots
+        self.weights = np.matrix(weights).T
+        self.p = degree
+        self.n = np.shape(ctrlpts)[0]-1
+        self.ctrlptsW = np.hstack((np.multiply(self.ctrlpts, self.weights), self.weights))
+
+    def evaluate(self, u):
+        i = basis.findSpan(self.n, self.p, u, self.U)
+        N = basis.basisFun(i, self.p, u, self.U)
+        tempPt = 0
+        for j in range(self.p+1):
+            tempPt += N[j, 0] * self.ctrlptsW[i-self.p+j, :]
+
+        pt = tempPt[0, 0:-1] / tempPt[0, -1]
+
+        return pt

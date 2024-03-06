@@ -8,7 +8,7 @@ weights = [1, 1/math.sqrt(2), 1, 2]
 
 rationB = BezierKit.bezier(ctrlpts)
 rationB.weights = weights
-u = 0.1
+u = 0
 # pt = rationB.evaluate(u)
 # print(pt)
 
