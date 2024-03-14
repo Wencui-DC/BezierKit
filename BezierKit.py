@@ -36,10 +36,8 @@ class bernstein:
             newI = i - order + j
             if (newI >= 0) and (newI <= newP):
                 derB += math.pow(-1, j) * math.comb(order, j) * bernstein.bernsteinPoly(newI, newP, u)
-
         if derB != 0 and order > 0:
             derB *= math.perm(p, order)
-
         return derB
 
 
@@ -57,7 +55,6 @@ class visualization:
         plt.axis('equal')
         plt.title(f'a bezier curve with degree of {p}')
         plt.show()
-
         return 0
 
 
@@ -77,7 +74,6 @@ class visualization:
         ax.set_box_aspect([1.0, 1.0, 1.0])
         plt.title(f'a bezier curve with degree of {p}')
         plt.show()
-
         return 0
 
 
@@ -96,7 +92,6 @@ class bezier(bernstein, visualization):
         pStarDer = 0.0
         for i in range(self.p+1):
             pStarDer += self.weights[i] * bernstein.derivative(i, self.p, u, order) * self.ctrlpts[i,:]
-
         return pStarDer
 
 
@@ -104,7 +99,6 @@ class bezier(bernstein, visualization):
         wDer = 0.0
         for i in range(self.p+1):
             wDer += self.weights[i] * bernstein.derivative(i, self.p, u, order)
-
         return wDer
 
     # evaluate a bezier curve a single u
@@ -115,9 +109,7 @@ class bezier(bernstein, visualization):
             weightTimesBernstein = self.weights[i] * bernstein.bernsteinPoly(i, self.p, u)
             sumWeights += weightTimesBernstein
             curvePt += weightTimesBernstein  * self.ctrlpts[i, :]
-
         curvePt = curvePt / sumWeights
-
         return curvePt
 
 
@@ -125,7 +117,6 @@ class bezier(bernstein, visualization):
     def derivative(self, u, order):
         if order < 0:
             raise ValueError('derivative order must be >= 0')
-
         m = self.p+1
         n = order+1
         wDers = np.zeros([m, 1])
@@ -134,15 +125,12 @@ class bezier(bernstein, visualization):
         for i in range(m):
             wDers[i, 0] = self.__wFunDer(u, i)
             bezierDers[i, :] = self.__pStarFunDer(u, i)
-
         for k in range(n):
             for i in range(k):
                 j = k - i
                 if j <= self.p:
                     bezierDers[k, :] -= math.comb(k, j) * bezierDers[i,:] * wDers[j, 0]
-
             bezierDers[k, :] /= wDers[0, 0]
-
         return bezierDers
 
 
@@ -153,7 +141,6 @@ class bezier(bernstein, visualization):
         trace = np.zeros((self.sampleSize, self.dimension))
         for i in range(self.sampleSize):
             trace[i, :] = self.evaluate(U[i])
-
         return trace
 
 
@@ -164,7 +151,6 @@ class bezier(bernstein, visualization):
     def length(self, a=0, b=1):
         if a<0 or b>1:
             raise ValueError('Interval of U is not within [0, 1]')
-
         coef_1 = (b - a) / 2
         coef_2 = (b + a) / 2
         Len = 0
@@ -175,10 +161,8 @@ class bezier(bernstein, visualization):
             normSquare = 0
             for j in range(self.dimension):
                 normSquare += firstDer[-1, j] ** 2
-
             Len += weights_LG[i] * math.sqrt(normSquare)
-        Len * coef_1
-
+        Len *= coef_1
         return Len
 
 
@@ -187,7 +171,6 @@ class bezier(bernstein, visualization):
         firstDer = self.derivative(u, 1)
         secondDer = self.derivative(u, 2)
         k = np.linalg.norm(np.cross(firstDer, secondDer)) / np.linalg.norm(firstDer)**3
-
         return k
 
 
@@ -199,7 +182,6 @@ class bezier(bernstein, visualization):
             visualization.plot3d(self.trace(), self.ctrlpts, self.p)
         else:
             raise ValueError('bezier.dimension is neither 2 nor 3!')
-
         return 0
 
 
@@ -213,7 +195,6 @@ class basis:
     def findSpan(n, p, u, U):
         if u == U[n + 1]:
             return n
-
         low = p
         high = n + 1
         index = (low + high) // 2
@@ -222,9 +203,7 @@ class basis:
                 high = index
             else:
                 low = index
-
             index = (low + high) // 2
-
         return index
 
 
@@ -246,9 +225,7 @@ class basis:
                 temp = N[r, 0] / (right[r, 0] + left[j-r-1, 0])
                 N[r, 0] = saved + right[r, 0] * temp
                 saved = left[j-r-1, 0] * temp
-
             N[j, 0] = saved
-
         return N
 
     @staticmethod
@@ -269,11 +246,9 @@ class basis:
                 temp = ndu[r, j-1] / ndu[j, r]
                 ndu[r, j] = saved + right[r+1,0]*temp
                 saved = left[j-r,0]*temp
-
             ndu[j,j] = saved
         for j in range(m):
             basisDers[0,j] = ndu[j,p]
-
         #this section computes the derivatives
         for r in range(m):
             s1 = 0
@@ -286,29 +261,23 @@ class basis:
                 if (r >= k):
                     a[s2,0] = a[s1,0] / ndu[pk+1, rk]
                     d = a[s2,0] * ndu[rk, pk]
-
                 j1 = 1 if rk >= -1 else -rk
                 j2 = k-1 if r-1 <= pk else p-r
                 for j in range(j1, j2+1):
                     a[s2,j] = (a[s1,j] - a[s1, j-1]) / ndu[pk+1, rk+j]
                     d += a[s2,j] * ndu[rk+j, pk]
-
                 if (r <= pk):
                     a[s2,k] = -a[s1,k-1] / ndu[pk+1, r]
                     d += a[s2,k] * ndu[r,pk]
-
                 basisDers[k,r] = d
                 j = s1
                 s1 = s2
                 s2 = j
-
         r = p
         for k in range(1, m):
             for j in range(m):
                 basisDers[k, j] *= r
-
             r *= (p-k)
-
         return basisDers
 
 
@@ -332,7 +301,6 @@ class nurbs(basis):
         for i in range(m):
             for j in range(m):
                 wDers[i, 0] += basisDers[i, j] * self.weights[span - self.p + j]
-
         return wDers
 
 
@@ -343,7 +311,6 @@ class nurbs(basis):
         for i in range(m):
             for j in range(m):
                 pStarDers[i, :] += basisDers[i, j] * self.weights[span - self.p + j] * self.ctrlpts[span - self.p + j, :]
-
         return pStarDers
 
 
@@ -352,9 +319,7 @@ class nurbs(basis):
             for m in range(1, k + 1):
                 if (m <= self.p):
                     ders[k, :] -= math.comb(k, m) * ders[k - m, :] * wDers[m]
-
             ders[k, :] /= wDers[0]
-
         return ders
 
     def evaluate(self, u):
@@ -363,16 +328,13 @@ class nurbs(basis):
         tempPt = 0
         for j in range(self.p+1):
             tempPt += N[j, 0] * self.ctrlptsW[i-self.p+j, :]
-
         pt = tempPt[0, 0:-1] / tempPt[0, -1]
-
         return pt
 
 
     def derivative(self, u, order):
         if order < 0:
             raise ValueError('derivative order must be >= 0')
-
         nurbsDers = np.zeros([order+1, self.dimension])
         span = basis.findSpan(self.n, self.p, u, self.U)
         basisDers = basis.derivatives(span, self.p, u, self.U)
@@ -380,5 +342,4 @@ class nurbs(basis):
         nurbsDers[0:self.p+1,:] = \
             self.__pStarFunDers(span, basisDers)
         nurbsDers = self.__calcRationalBSplineAndBezierDers(nurbsDers, wDers, order)
-
         return nurbsDers
