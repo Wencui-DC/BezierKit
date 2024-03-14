@@ -81,7 +81,7 @@ class visualization:
 class bezier(bernstein, visualization):
     def __init__(self, ctrlpts):
         super().__init__()
-        self.ctrlpts = np.matrix(ctrlpts) # the control points
+        self.ctrlpts = np.array(ctrlpts) # the control points
         [rown, coln] = np.shape(ctrlpts)
         self.p = rown - 1 # bezier curve's degree
         self.weights = np.ones(self.p+1) #default it's all one
@@ -123,14 +123,14 @@ class bezier(bernstein, visualization):
         pStarDers = np.zeros([m, self.dimension])
         bezierDers = np.zeros([n, self.dimension])
         for i in range(m):
-            wDers[i, 0] = self.__wFunDer(u, i)
+            wDers[i] = self.__wFunDer(u, i)
             bezierDers[i, :] = self.__pStarFunDer(u, i)
         for k in range(n):
             for i in range(k):
                 j = k - i
                 if j <= self.p:
-                    bezierDers[k, :] -= math.comb(k, j) * bezierDers[i,:] * wDers[j, 0]
-            bezierDers[k, :] /= wDers[0, 0]
+                    bezierDers[k, :] -= math.comb(k, j) * bezierDers[i,:] * wDers[j]
+            bezierDers[k, :] /= wDers[0]
         return bezierDers
 
 
@@ -218,14 +218,14 @@ class basis:
         left = np.zeros([p, 1])
         right = np.zeros([p, 1])
         for j in range(1, p+1):
-            left[j-1, 0] = u - U[i+1-j]
-            right[j-1, 0] = U[i+j] - u
+            left[j-1] = u - U[i+1-j]
+            right[j-1] = U[i+j] - u
             saved = 0.0;
             for r in range(j):
-                temp = N[r, 0] / (right[r, 0] + left[j-r-1, 0])
-                N[r, 0] = saved + right[r, 0] * temp
-                saved = left[j-r-1, 0] * temp
-            N[j, 0] = saved
+                temp = N[r] / (right[r] + left[j-r-1])
+                N[r] = saved + right[r] * temp
+                saved = left[j-r-1] * temp
+            N[j] = saved
         return N
 
     @staticmethod
@@ -238,14 +238,14 @@ class basis:
         right = np.zeros([m,1])
         basisDers = np.zeros([m, m])
         for j in range(1, m):
-            left[j,0] = u - U[i+1-j]
-            right[j,0] = U[i+j] - u
+            left[j] = u - U[i+1-j]
+            right[j] = U[i+j] - u
             saved = 0.0
             for r in range(j):
-                ndu[j, r] = right[r+1,0] + left[j-r,0]
+                ndu[j, r] = right[r+1] + left[j-r]
                 temp = ndu[r, j-1] / ndu[j, r]
-                ndu[r, j] = saved + right[r+1,0]*temp
-                saved = left[j-r,0]*temp
+                ndu[r, j] = saved + right[r+1]*temp
+                saved = left[j-r]*temp
             ndu[j,j] = saved
         for j in range(m):
             basisDers[0,j] = ndu[j,p]
@@ -285,14 +285,14 @@ class basis:
 class nurbs(basis):
     def __init__(self, ctrlpts, knots, weights, degree):
         super().__init__()
-        self.ctrlpts = np.matrix(ctrlpts)
-        self.U = knots
+        self.ctrlpts = np.array(ctrlpts)
+        self.U = np.array(knots)
         self.p = degree
         [rown, coln] = np.shape(ctrlpts)
         self.n = rown - 1
-        self.weights = np.matrix(weights).T
+        self.weights = np.array(weights)
         self.dimension = coln
-        self.ctrlptsW = np.hstack((np.multiply(self.ctrlpts, self.weights), self.weights))
+        self.ctrlptsW = np.column_stack((self.ctrlpts * self.weights.reshape(rown, 1), self.weights))
 
 
     def __wFunDers(self, span, basisDers):
@@ -300,14 +300,13 @@ class nurbs(basis):
         wDers = np.zeros([m, 1])
         for i in range(m):
             for j in range(m):
-                wDers[i, 0] += basisDers[i, j] * self.weights[span - self.p + j]
+                wDers[i] += basisDers[i, j] * self.weights[span - self.p + j]
         return wDers
 
 
     def __pStarFunDers(self, span, basisDers):
         m = self.p + 1
         pStarDers = np.zeros([m, self.dimension])
-        pStarDers = np.matrix(pStarDers)
         for i in range(m):
             for j in range(m):
                 pStarDers[i, :] += basisDers[i, j] * self.weights[span - self.p + j] * self.ctrlpts[span - self.p + j, :]
@@ -327,8 +326,8 @@ class nurbs(basis):
         N = basis.evaluate(i, self.p, u, self.U)
         tempPt = 0
         for j in range(self.p+1):
-            tempPt += N[j, 0] * self.ctrlptsW[i-self.p+j, :]
-        pt = tempPt[0, 0:-1] / tempPt[0, -1]
+            tempPt += N[j] * self.ctrlptsW[i-self.p+j, :]
+        pt = tempPt[0:-1] / tempPt[-1]
         return pt
 
 

@@ -9,8 +9,8 @@ knots = [0, 0, 0, 0, 1, 1, 1, 1]
 rationB = BezierKit.bezier(ctrlpts)
 rationB.weights = [2, 1, 1, 1]
 u = 0.59
-# pt = rationB.evaluate(u)
-# print(pt)
+pt = rationB.evaluate(u)
+print(pt)
 
 # order = 8
 # wDerRecord = np.zeros([order, 1])
