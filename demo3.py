@@ -7,7 +7,7 @@ knots = [0, 0, 0, 0, .3, 1, 1, 1, 1]
 weights = [2, 1, 1, 1, 3]
 degree = 3
 
-u = 0.59
+u = 0.1
 nurbs = BezierKit.nurbs(ctrlpts, knots, weights, degree)
 
 pt = nurbs.evaluate(u)

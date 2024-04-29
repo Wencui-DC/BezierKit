@@ -88,14 +88,14 @@ class bezier(bernstein, visualization):
         self.dimension = coln # It is either 3 or 2.
         self.sampleSize = 50 # default number of interpolation steps
 
-    def __pStarFunDer(self, u, order):
+    def __pStarDer(self, u, order):
         pStarDer = 0.0
         for i in range(self.p+1):
             pStarDer += self.weights[i] * bernstein.derivative(i, self.p, u, order) * self.ctrlpts[i,:]
         return pStarDer
 
 
-    def __wFunDer(self, u, order):
+    def __wDer(self, u, order):
         wDer = 0.0
         for i in range(self.p+1):
             wDer += self.weights[i] * bernstein.derivative(i, self.p, u, order)
@@ -126,8 +126,8 @@ class bezier(bernstein, visualization):
         wDers = np.zeros([m, 1])
         bezierDers = np.zeros([n, self.dimension])
         for i in range(m):
-            wDers[i] = self.__wFunDer(u, i)
-            bezierDers[i, :] = self.__pStarFunDer(u, i)
+            wDers[i] = self.__wDer(u, i)
+            bezierDers[i, :] = self.__pStarDer(u, i)
         for k in range(n):
             for i in range(k):
                 j = k - i
@@ -160,11 +160,9 @@ class bezier(bernstein, visualization):
         abscissaeLen = 15
         for i in range(abscissaeLen):
             u = coef_1 * abscissae[i] + coef_2
-            der = self.derivative(u, 1)
-            firstDer = der[1, :]
-            normSquare = 0
-            for j in range(self.dimension):
-                normSquare += firstDer ** 2
+            ders = self.derivative(u, 1)
+            firstDer = ders[1, :]
+            normSquare = np.sum(firstDer**2)
             Len += weights_LG[i] * math.sqrt(normSquare)
         Len *= coef_1
         return Len
@@ -172,8 +170,9 @@ class bezier(bernstein, visualization):
 
     # calculate the curvature at u
     def curvature(self, u):
-        firstDer = self.derivative(u, 1)
-        secondDer = self.derivative(u, 2)
+        ders = self.derivative(u, 2)
+        firstDer = ders[1, :]
+        secondDer = ders[2, :]
         k = np.linalg.norm(np.cross(firstDer, secondDer)) / np.linalg.norm(firstDer)**3
         return k
 
@@ -299,7 +298,7 @@ class nurbs(basis):
         self.ctrlptsW = np.column_stack((self.ctrlpts * self.weights.reshape(rown, 1), self.weights))
 
 
-    def __wFunDers(self, span, basisDers):
+    def __wDers(self, span, basisDers):
         m = self.p + 1
         wDers = np.zeros([m, 1])
         for i in range(m):
@@ -308,7 +307,7 @@ class nurbs(basis):
         return wDers
 
 
-    def __pStarFunDers(self, span, basisDers):
+    def __pStarDers(self, span, basisDers):
         m = self.p + 1
         pStarDers = np.zeros([m, self.dimension])
         for i in range(m):
@@ -341,8 +340,8 @@ class nurbs(basis):
         nurbsDers = np.zeros([order+1, self.dimension])
         span = basis.findSpan(self.n, self.p, u, self.U)
         basisDers = basis.derivatives(span, self.p, u, self.U)
-        wDers = self.__wFunDers(span, basisDers)
+        wDers = self.__wDers(span, basisDers)
         nurbsDers[0:self.p+1,:] = \
-            self.__pStarFunDers(span, basisDers)
+            self.__pStarDers(span, basisDers)
         nurbsDers = self.__calcRationalBSplineAndBezierDers(nurbsDers, wDers, order)
         return nurbsDers

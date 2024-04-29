@@ -28,5 +28,3 @@ order = 1
 der = bezier.derivative(u, order)
 for i in range(order+1):
     print('The %d-order derivative of C(%.2f) =[%.4f, %.4f, %.4f]' % (i, u, der[i, 0], der[i, 1], der[i, 2]))
-
-Len = bezier.length(0, 0.1)

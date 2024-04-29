@@ -1,4 +1,5 @@
 import BezierKit
+import numpy as np
 
 ## sample1: create a bezier curve
 # 3D bezier
@@ -10,6 +11,8 @@ ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
 
 # create a bezier
 bezier = BezierKit.bezier(ctrlpts)
+bezier.weights = [1, 1/np.sqrt(2), 1, 2]
+
 
 
 ## sample2: plot a bezier
@@ -21,7 +24,7 @@ trace = bezier.trace()
 
 
 ## sample4: evaluate the curve at single u
-u = 0.23
+u = 0.1
 pt = bezier.evaluate(u)
 if bezier.dimension == 3:
     print("C(%.2f) = [%.4f, %.4f, %.4f]" % (u, pt[0], pt[1], pt[2]))
@@ -32,8 +35,7 @@ else:
 
 
 ## sample5: calculate the order-th derivative of a bezier curve
-u = 0.2
-order = 1
+order = 10
 der = bezier.derivative(u, order)
 for i in range(order + 1):
     if bezier.dimension == 3:
@@ -45,14 +47,13 @@ for i in range(order + 1):
 
 
 ## sample6: calculate the length of the curve
-Len = bezier.length(0, 0.1)
+Len = bezier.length(0, 1)
 print("The arc length is %.10f" % Len)
 # The default parameter a and b are 0 and 1. You can adjust them within [0, 1],
 # for example: Len = bezier.length(0.5, 1)
 
 
 ## sample7: calculate the curve's curvature
-u = 0.23
 k = bezier.curvature(u)
 print("The curvature at %.2f is %.4f" % (u, k))
 
