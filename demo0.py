@@ -24,22 +24,22 @@ trace = bezier.trace()
 u = 0.23
 pt = bezier.evaluate(u)
 if bezier.dimension == 3:
-    print("C(%.2f) = [%.4f, %.4f, %.4f]" % (u, pt[0, 0], pt[0, 1], pt[0, 2]))
+    print("C(%.2f) = [%.4f, %.4f, %.4f]" % (u, pt[0], pt[1], pt[2]))
 elif bezier.dimension == 2:
-    print("C(%.2f) = [%.4f, %.4f]" % (u, pt[0, 0], pt[0, 1]))
+    print("C(%.2f) = [%.4f, %.4f]" % (u, pt[0], pt[1]))
 else:
     raise ValueError('The dimension of ctrlpts is neither 2 nor 3!')
 
 
 ## sample5: calculate the order-th derivative of a bezier curve
 u = 0.2
-order = 5
+order = 1
+der = bezier.derivative(u, order)
 for i in range(order + 1):
-    der = bezier.derivative(u, i)
     if bezier.dimension == 3:
-        print("The %d-order derivative of C(%.2f) = [%.4f, %.4f, %.4f]" % (i, u, der[0, 0], der[0, 1], der[0, 2]))
+        print("The %d-order derivative of C(%.2f) = [%.4f, %.4f, %.4f]" % (i, u, der[i, 0], der[i, 1], der[i, 2]))
     elif bezier.dimension == 2:
-        print("The %d-order derivative of C(%.2f) = [%.4f, %.4f]" % (i, u, der[0, 0], der[0, 1]))
+        print("The %d-order derivative of C(%.2f) = [%.4f, %.4f]" % (i, u, der[i, 0], der[i, 1]))
     else:
         raise ValueError("The dimension of ctrlpts is neither 2 nor 3!")
 

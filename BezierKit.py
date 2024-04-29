@@ -117,10 +117,13 @@ class bezier(bernstein, visualization):
     def derivative(self, u, order):
         if order < 0:
             raise ValueError('derivative order must be >= 0')
-        m = self.p+1
-        n = order+1
+        n = order + 1
+        if order <= self.p:
+            m = n
+        else:
+            m = self.p + 1
+
         wDers = np.zeros([m, 1])
-        pStarDers = np.zeros([m, self.dimension])
         bezierDers = np.zeros([n, self.dimension])
         for i in range(m):
             wDers[i] = self.__wFunDer(u, i)
@@ -157,10 +160,11 @@ class bezier(bernstein, visualization):
         abscissaeLen = 15
         for i in range(abscissaeLen):
             u = coef_1 * abscissae[i] + coef_2
-            firstDer = self.derivative(u, 1)
+            der = self.derivative(u, 1)
+            firstDer = der[1, :]
             normSquare = 0
             for j in range(self.dimension):
-                normSquare += firstDer[-1, j] ** 2
+                normSquare += firstDer ** 2
             Len += weights_LG[i] * math.sqrt(normSquare)
         Len *= coef_1
         return Len
