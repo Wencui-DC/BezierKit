@@ -11,12 +11,12 @@ ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
 
 # create a bezier
 bezier = BezierKit.bezier(ctrlpts)
-bezier.weights = [1, 1/np.sqrt(2), 1, 2]
+# bezier.weights = [1, 1/np.sqrt(2), 1, 2]
 
 
 
 ## sample2: plot a bezier
-bezier.vis()
+# bezier.vis()
 
 
 ## sample3: calculate the trace of the bezier
@@ -35,7 +35,7 @@ else:
 
 
 ## sample5: calculate the order-th derivative of a bezier curve
-order = 10
+order = 2
 der = bezier.derivative(u, order)
 for i in range(order + 1):
     if bezier.dimension == 3:
