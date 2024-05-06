@@ -22,14 +22,16 @@ print(pt)
 ## sample4: calculate the trace of the bezier
 trace = bezier.trace()
 
-## sample5: calculate the order-th derivative of a bezier curve
+## smaple5: change the weights of the bezier 
+bezier.weights = [1 2 3 1]
+
+## sample6: calculate the (0, orther)-th derivatives of a bezier curve
 order = 5
 
 der = bezier.derivative(u, order)
 
 print(der)
-
-## sample6: calculate the arc length
+## sample7: calculate the arc length
 Len = bezier.length()
 
 print("The arc length is %.10f" % Len)

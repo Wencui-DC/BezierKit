@@ -30,10 +30,11 @@ class bernstein:
         @:return
         bernstein function's value
         '''
+        bernsteinFun = 0.
         if 0 <= i <= p:
-            return math.comb(p, i) * math.pow(u, i) * math.pow(1 - u, p - i)
-        else:
-            return 0
+            bernsteinFun = math.comb(p, i) * math.pow(u, i) * math.pow(1 - u, p - i)
+
+        return bernsteinFun
 
     @staticmethod
     # calculate the derivative of bernstein polynomial
@@ -197,7 +198,7 @@ class bezier(bernstein, visualization):
 
         arcLen *= coef_1
 
-        return Len
+        return arcLen
 
 
     # calculate the curvature at u
@@ -382,7 +383,7 @@ class nurbs(basis):
     def evaluate(self, u):
         i = basis.findSpan(self.n, self.p, u, self.U)
         N = basis.evaluate(i, self.p, u, self.U)
-        tempPt = 0
+        tempPt = 0.
         for j in range(self.p+1):
             tempPt += N[j] * self.ctrlptsW[i-self.p+j, :]
 
@@ -391,10 +392,17 @@ class nurbs(basis):
         return pt
 
     def derivative(self, u, order):
+        '''
+        @:parameter
+        u: the parameter u
+        order: the order of the derivative
+
+        @:return: derivatives
+        '''
         if order < 0:
             raise ValueError('derivative order must be >= 0')
 
-        k = (order + 1) if order <= self.p else (self.p+1)
+        k = (order+1) if order <= self.p else (self.p+1)
         nurbsDers = np.zeros([order+1, self.dimension])
         span = basis.findSpan(self.n, self.p, u, self.U)
         basisDers = basis.derivatives(span, self.p, u, self.U, order)
@@ -403,3 +411,32 @@ class nurbs(basis):
         nurbsDers = self.__calcRationalBSplineAndBezierDers(nurbsDers, wDers, order)
 
         return nurbsDers
+
+    def length(self, a=0, b=1):
+        '''calculate the arc length of nurbs curves,
+        using Legendre-Gauss quadrature
+
+        @:parameter
+        a: the lower bound of parameter u \in [0,1]
+        b: the higher bound of parameter u \in [0,1]
+
+        @:return
+        arcLen: the arc length
+        '''
+        if a<0 or b>1:
+            raise ValueError('Interval of U is not within [0, 1]')
+
+        coef_1 = (b - a) / 2
+        coef_2 = (b + a) / 2
+        arcLen = 0
+        abscissaeLen = 15
+        for i in range(abscissaeLen):
+            u = coef_1 * abscissae[i] + coef_2
+            ders = self.derivative(u, 1)
+            firstDer = ders[1, :]
+            normSquare = np.sum(firstDer**2)
+            arcLen += weights_LG[i] * math.sqrt(normSquare)
+
+        arcLen *= coef_1
+
+        return arcLen

@@ -24,7 +24,7 @@ trace = bezier.trace()
 
 
 ## sample4: evaluate the curve at single u
-u = 0.1
+u = 0.76
 pt = bezier.evaluate(u)
 if bezier.dimension == 3:
     print("C(%.2f) = [%.4f, %.4f, %.4f]" % (u, pt[0], pt[1], pt[2]))
@@ -48,7 +48,7 @@ for i in range(order + 1):
 
 ## sample6: calculate the length of the curve
 Len = bezier.length(0, 1)
-print("The arc length is %.10f" % Len)
+print("The curve length is %.4f" % Len)
 # The default parameter a and b are 0 and 1. You can adjust them within [0, 1],
 # for example: Len = bezier.length(0.5, 1)
 
