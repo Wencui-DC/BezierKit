@@ -284,7 +284,7 @@ class basis:
     @staticmethod
     def derivatives(i, p, u, U, order):
         m = p + 1
-        n = (order+1) if order <= p else (p+1)
+        n = (order+1) if order <= p else m
         ndu = np.zeros([m, m])
         ndu[0,0] = 1.0
         a = np.zeros([2, n])
@@ -349,11 +349,26 @@ class nurbs(basis):
         self.ctrlpts = np.array(ctrlpts)
         self.U = np.array(knots)
         self.p = degree
-        [rown, coln] = np.shape(ctrlpts)
+        rown, coln = np.shape(ctrlpts)
         self.n = rown - 1
         self.weights = np.array(weights)
         self.dimension = coln
+        self.sampleSize = 50  # default number of interpolation steps
+        self.__update_ctrlptsW()
+
+    @property
+    def weights(self):
+        return self._weights
+
+    @weights.setter
+    def weights(self, value):
+        self._weights = np.array(value)
+        self.__update_ctrlptsW()
+
+    def __update_ctrlptsW(self):
+        rown = self.n + 1
         self.ctrlptsW = np.column_stack((self.ctrlpts * self.weights.reshape(rown, 1), self.weights))
+
 
     def __wDers(self, span, basisDers, k):
         wDers = np.zeros([k, 1])
@@ -440,3 +455,27 @@ class nurbs(basis):
         arcLen *= coef_1
 
         return arcLen
+
+    def trace(self):
+        '''calculate the trace of a nurbs curve
+
+        @:return
+        trace: the trace (interpolated points) of the curve
+        '''
+        step = 1 / (self.sampleSize - 1)
+        U = np.arange(0, 1 + step, step)
+        trace = np.zeros((self.sampleSize, self.dimension))
+        for i in range(self.sampleSize):
+            trace[i, :] = self.evaluate(U[i])
+
+        return trace
+
+    def vis(self):
+        if self.dimension == 2:
+            visualization.plot2d(self.trace(), self.ctrlpts, self.p)
+        elif self.dimension == 3:
+            visualization.plot3d(self.trace(), self.ctrlpts, self.p)
+        else:
+            raise ValueError('The nurbs.dimension is neither 2 nor 3!')
+
+        return 0
