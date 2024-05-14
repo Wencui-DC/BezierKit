@@ -26,7 +26,7 @@ for i in range(order+1):
 # calculate its arc length, the default u interval is [0,1].
 # You can change it to any interval, ex: nurbs.length(0,0.33) or nurbs.length(0.15, 0.79)
 len = nurbs.length()
-print('The nurbs length is %.4f' % len)
+print('nurbs length is %.4f' % len)
 
 # calculate the curvature at u
 k = nurbs.curvature(u)
