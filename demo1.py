@@ -5,7 +5,7 @@ ctrlpts = [0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0], [9, 9, 9]
 knots = [0, 0, 0, 0, .3, 1, 1, 1, 1]
 weights = [1, 1, 1, 1, 1]
 degree = 3
-u = .76
+u = 0.76
 
 # create a nurbs
 nurbs = BezierKit.nurbs(ctrlpts, knots, weights, degree)
@@ -28,6 +28,11 @@ for i in range(order+1):
 len = nurbs.length()
 print('The nurbs length is %.4f' % len)
 
+# calculate the curvature at u
+k = nurbs.curvature(u)
+print('Curvature at %.2f is %.4f' % (u,k))
+
 # plot the nurbs
 nurbs.vis()
+
 

@@ -88,8 +88,62 @@ class visualization:
 
         return 0
 
+class common():
+    @staticmethod
+    def arcLen(derivativeFun, a, b):
+        '''calculate the arc length of the bezier/nurbs curve,
+        using Legendre-Gauss quadrature
 
-class bezier(bernstein, visualization):
+        @:parameter
+        a: the lower bound of parameter u \in [0,1]
+        b: the higher bound of parameter u \in [0,1]
+
+        @:return
+        arcLen: the arc length
+        '''
+        if a < 0 or b > 1:
+            raise ValueError('Interval of U is not within [0, 1]')
+
+        coef_1 = (b - a) / 2
+        coef_2 = (b + a) / 2
+        arcLen = 0
+        abscissaeLen = 15
+        for i in range(abscissaeLen):
+            u = coef_1 * abscissae[i] + coef_2
+            ders = derivativeFun(u, 1)
+            firstDer = ders[1, :]
+            normSquare = np.sum(firstDer ** 2)
+            arcLen += weights_LG[i] * math.sqrt(normSquare)
+
+        arcLen *= coef_1
+
+        return arcLen
+    @staticmethod
+    def curvature(derivativeFun, u):
+        ders = derivativeFun(u, 2)
+        firstDer = ders[1, :]
+        secondDer = ders[2, :]
+        k = np.linalg.norm(np.cross(firstDer, secondDer)) / np.linalg.norm(firstDer)**3
+
+        return k
+
+    @staticmethod
+    def trace(evaluateFun, sampleSize, dimension):
+        '''calculate the trace of a bezier/nurbs curve
+
+        @:return
+        trace: the trace (interpolated points) of the curve
+        '''
+        step = 1 / (sampleSize - 1)
+        U = np.arange(0, 1 + step, step)
+        trace = np.zeros((sampleSize, dimension))
+        for i in range(sampleSize):
+            trace[i, :] = evaluateFun(U[i])
+
+        return trace
+
+
+class bezier(bernstein, visualization, common):
     '''bezier class, including the rational bezier feature'''
     def __init__(self, ctrlpts):
         super().__init__()
@@ -114,7 +168,7 @@ class bezier(bernstein, visualization):
         self.ctrlptsW = np.column_stack((self.ctrlpts * self.weights.reshape(rown, 1), self.weights))
 
     def __pStarDer(self, u, order):
-        pStarDer = 0.0
+        pStarDer = np.zeros(self.dimension)
         for i in range(self.p+1):
             pStarDer += self.weights[i] * bernstein.derivative(i, self.p, u, order) * self.ctrlpts[i,:]
 
@@ -129,7 +183,7 @@ class bezier(bernstein, visualization):
 
     def evaluate(self, u):
         '''evaluate a bezier curve a single u'''
-        curvePt = 0.0
+        curvePt = np.zeros(self.dimension + 1)
         for i in range(self.p + 1):
             curvePt += self.ctrlptsW[i,:] * bernstein.bernsteinPoly(i, self.p, u)
 
@@ -161,56 +215,17 @@ class bezier(bernstein, visualization):
         return bezierDers
 
     def trace(self):
-        '''calculate the trace of a bezier curve
+        '''calculate the trace of a bezier curve'''
+        return common.trace(self.evaluate, self.sampleSize, self.dimension)
 
-        @:return
-        trace: the trace (interpolated points) of the curve
-        '''
-        step = 1 / (self.sampleSize - 1)
-        U = np.arange(0, 1 + step, step)
-        trace = np.zeros((self.sampleSize, self.dimension))
-        for i in range(self.sampleSize):
-            trace[i, :] = self.evaluate(U[i])
-
-        return trace
-
-    def length(self, a=0, b=1):
+    def length(self, a = 0, b = 1):
         '''calculate the arc length of the bezier curve,
-        using Legendre-Gauss quadrature
-
-        @:parameter
-        a: the lower bound of parameter u \in [0,1]
-        b: the higher bound of parameter u \in [0,1]
-
-        @:return
-        arcLen: the arc length
-        '''
-        if a<0 or b>1:
-            raise ValueError('Interval of U is not within [0, 1]')
-
-        coef_1 = (b - a) / 2
-        coef_2 = (b + a) / 2
-        arcLen = 0
-        abscissaeLen = 15
-        for i in range(abscissaeLen):
-            u = coef_1 * abscissae[i] + coef_2
-            ders = self.derivative(u, 1)
-            firstDer = ders[1, :]
-            normSquare = np.sum(firstDer**2)
-            arcLen += weights_LG[i] * math.sqrt(normSquare)
-
-        arcLen *= coef_1
-
-        return arcLen
+        using Legendre-Gauss quadrature'''
+        return common.arcLen(self.derivative, a, b)
 
     def curvature(self, u):
         '''calculate the curvature at u'''
-        ders = self.derivative(u, 2)
-        firstDer = ders[1, :]
-        secondDer = ders[2, :]
-        k = np.linalg.norm(np.cross(firstDer, secondDer)) / np.linalg.norm(firstDer)**3
-
-        return k
+        return common.curvature(self.derivative, u)
 
     # plot a bezier
     def vis(self):
@@ -219,10 +234,9 @@ class bezier(bernstein, visualization):
         elif self.dimension == 3:
             visualization.plot3d(self.trace(), self.ctrlpts, self.p)
         else:
-            raise ValueError('bezier.dimension is neither 2 nor 3!')
+            raise ValueError('The curve dimension is neither 2 nor 3!')
 
         return 0
-
 
 class basis:
     @staticmethod
@@ -342,7 +356,7 @@ class basis:
         return basisDers
 
 
-class nurbs(basis):
+class nurbs(basis, visualization, common):
     def __init__(self, ctrlpts, knots, weights, degree):
         super().__init__()
         self.ctrlpts = np.array(ctrlpts)
@@ -369,7 +383,7 @@ class nurbs(basis):
         self.ctrlptsW = np.column_stack((self.ctrlpts * self.weights.reshape(rown, 1), self.weights))
 
     def __wDers(self, span, basisDers, k):
-        wDers = np.zeros([k, 1])
+        wDers = np.zeros(k)
         for i in range(k):
             for j in range(self.p + 1):
                 wDers[i] += basisDers[i, j] * self.weights[span - self.p + j]
@@ -396,7 +410,7 @@ class nurbs(basis):
     def evaluate(self, u):
         i = basis.findSpan(self.n, self.p, u, self.U)
         N = basis.evaluate(i, self.p, u, self.U)
-        tempPt = 0.
+        tempPt = np.zeros(self.dimension + 1)
         for j in range(self.p+1):
             tempPt += N[j] * self.ctrlptsW[i-self.p+j, :]
 
@@ -427,46 +441,15 @@ class nurbs(basis):
 
     def length(self, a=0, b=1):
         '''calculate the arc length of nurbs curves,
-        using Legendre-Gauss quadrature
+        using Legendre-Gauss quadrature'''
+        return common.arcLen(self.derivative, a, b)
 
-        @:parameter
-        a: the lower bound of parameter u \in [0,1]
-        b: the higher bound of parameter u \in [0,1]
-
-        @:return
-        arcLen: the arc length
-        '''
-        if a<0 or b>1:
-            raise ValueError('Interval of U is not within [0, 1]')
-
-        coef_1 = (b - a) / 2
-        coef_2 = (b + a) / 2
-        arcLen = 0
-        abscissaeLen = 15
-        for i in range(abscissaeLen):
-            u = coef_1 * abscissae[i] + coef_2
-            ders = self.derivative(u, 1)
-            firstDer = ders[1, :]
-            normSquare = np.sum(firstDer**2)
-            arcLen += weights_LG[i] * math.sqrt(normSquare)
-
-        arcLen *= coef_1
-
-        return arcLen
+    def curvature(self, u):
+        return common.curvature(self.derivative, u)
 
     def trace(self):
-        '''calculate the trace of a nurbs curve
-
-        @:return
-        trace: the trace (interpolated points) of the curve
-        '''
-        step = 1 / (self.sampleSize - 1)
-        U = np.arange(0, 1 + step, step)
-        trace = np.zeros((self.sampleSize, self.dimension))
-        for i in range(self.sampleSize):
-            trace[i, :] = self.evaluate(U[i])
-
-        return trace
+        '''calculate the trace of a nurbs curve'''
+        return common.trace(self.evaluate, self.sampleSize, self.dimension)
 
     def vis(self):
         if self.dimension == 2:
@@ -474,6 +457,6 @@ class nurbs(basis):
         elif self.dimension == 3:
             visualization.plot3d(self.trace(), self.ctrlpts, self.p)
         else:
-            raise ValueError('The nurbs.dimension is neither 2 nor 3!')
+            raise ValueError('The curve dimension is neither 2 nor 3!')
 
         return 0

@@ -21,6 +21,7 @@ bezier.vis()
 
 ## sample3: calculate the trace of the bezier
 trace = bezier.trace()
+# print(trace)
 
 
 ## sample4: evaluate the curve at single u
