@@ -37,8 +37,8 @@ class bernstein:
         return bernsteinFun
 
     @staticmethod
-    # calculate the derivative of bernstein polynomial
     def derivative(i, p, u, order):
+        '''calculate the derivative of bernstein polynomial'''
         derB = 0.0
         newP = p - order
         for j in range(order + 1):
@@ -69,7 +69,6 @@ class visualization:
 
         return 0
 
-
     @staticmethod
     def plot3d(trace, ctrlpts, p):
         fig = plt.figure()
@@ -90,16 +89,29 @@ class visualization:
         return 0
 
 
-# bezier class, including the rational bezier feature
 class bezier(bernstein, visualization):
+    '''bezier class, including the rational bezier feature'''
     def __init__(self, ctrlpts):
         super().__init__()
         self.ctrlpts = np.array(ctrlpts) # the control points
         [rown, coln] = np.shape(ctrlpts)
         self.p = rown - 1 # bezier curve's degree
-        self.weights = np.ones(self.p+1) #default it's all one
+        self._weights = np.ones(rown) #default it's all one
         self.dimension = coln # It is either 3 or 2.
         self.sampleSize = 50 # default number of interpolation steps
+        self.__update_ctrlptsW()
+    @property
+    def weights(self):
+        return self._weights
+
+    @weights.setter
+    def weights(self, value):
+        self._weights = np.array(value)
+        self.__update_ctrlptsW()
+
+    def __update_ctrlptsW(self):
+        rown = self.p + 1
+        self.ctrlptsW = np.column_stack((self.ctrlpts * self.weights.reshape(rown, 1), self.weights))
 
     def __pStarDer(self, u, order):
         pStarDer = 0.0
@@ -108,7 +120,6 @@ class bezier(bernstein, visualization):
 
         return pStarDer
 
-
     def __wDer(self, u, order):
         wDer = 0.0
         for i in range(self.p+1):
@@ -116,31 +127,23 @@ class bezier(bernstein, visualization):
 
         return wDer
 
-    # evaluate a bezier curve a single u
     def evaluate(self, u):
+        '''evaluate a bezier curve a single u'''
         curvePt = 0.0
-        sumWeights = 0.0
         for i in range(self.p + 1):
-            weightTimesBernstein = self.weights[i] * bernstein.bernsteinPoly(i, self.p, u)
-            sumWeights += weightTimesBernstein
-            curvePt += weightTimesBernstein  * self.ctrlpts[i, :]
+            curvePt += self.ctrlptsW[i,:] * bernstein.bernsteinPoly(i, self.p, u)
 
-        curvePt = curvePt / sumWeights
+        pt = curvePt[0:-1] / curvePt[-1]
 
-        return curvePt
+        return pt
 
-
-    # calculate the order-th derivative of a bezier curve at designated u
     def derivative(self, u, order):
+        '''calculate the order-th derivative of a bezier curve at designated u'''
         if order < 0:
             raise ValueError('derivative order must be >= 0')
 
         n = order + 1
-        if order <= self.p:
-            m = n
-        else:
-            m = self.p + 1
-
+        m = n if order <= self.p else (self.p + 1)
         wDers = np.zeros([m, 1])
         bezierDers = np.zeros([n, self.dimension])
         for i in range(m):
@@ -200,16 +203,14 @@ class bezier(bernstein, visualization):
 
         return arcLen
 
-
-    # calculate the curvature at u
     def curvature(self, u):
+        '''calculate the curvature at u'''
         ders = self.derivative(u, 2)
         firstDer = ders[1, :]
         secondDer = ders[2, :]
         k = np.linalg.norm(np.cross(firstDer, secondDer)) / np.linalg.norm(firstDer)**3
 
         return k
-
 
     # plot a bezier
     def vis(self):
@@ -251,8 +252,6 @@ class basis:
             index = (low + high) // 2
 
         return index
-
-
 
     @staticmethod
     def evaluate(i, p, u, U):
@@ -351,7 +350,7 @@ class nurbs(basis):
         self.p = degree
         rown, coln = np.shape(ctrlpts)
         self.n = rown - 1
-        self.weights = np.array(weights)
+        self._weights = np.array(weights)
         self.dimension = coln
         self.sampleSize = 50  # default number of interpolation steps
         self.__update_ctrlptsW()
@@ -368,7 +367,6 @@ class nurbs(basis):
     def __update_ctrlptsW(self):
         rown = self.n + 1
         self.ctrlptsW = np.column_stack((self.ctrlpts * self.weights.reshape(rown, 1), self.weights))
-
 
     def __wDers(self, span, basisDers, k):
         wDers = np.zeros([k, 1])

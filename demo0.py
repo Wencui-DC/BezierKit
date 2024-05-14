@@ -15,7 +15,6 @@ bezier = BezierKit.bezier(ctrlpts)
 bezier.weights = [1, 1/np.sqrt(2), 1, 2]
 
 
-
 ## sample2: plot a bezier
 bezier.vis()
 
