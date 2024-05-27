@@ -12,7 +12,7 @@ ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
 # create a bezier
 bezier = BezierKit.bezier(ctrlpts)
 # adjust the weights
-bezier.weights = [1, 1/np.sqrt(2), 1, 2]
+# bezier.weights = [1, 1/np.sqrt(2), 1, 2]
 
 
 ## sample2: plot a bezier
@@ -25,7 +25,7 @@ trace = bezier.trace()
 
 
 ## sample4: evaluate the curve at single u
-u = 0.76
+u = 0.21
 pt = bezier.evaluate(u)
 if bezier.dimension == 3:
     print("C(%.2f) = [%.4f, %.4f, %.4f]" % (u, pt[0], pt[1], pt[2]))
@@ -36,7 +36,7 @@ else:
 
 
 ## sample5: calculate the order-th derivative of a bezier curve
-order = 2
+order = 6
 der = bezier.derivative(u, order)
 for i in range(order + 1):
     if bezier.dimension == 3:

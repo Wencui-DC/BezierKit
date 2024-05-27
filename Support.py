@@ -42,10 +42,11 @@ class bernstein:
         '''calculate the derivative of bernstein polynomial'''
         derB = 0.0
         newP = p - order
-        for j in range(order + 1):
-            newI = i - order + j
-            if (newI >= 0) and (newI <= newP):
-                derB += np.power(-1, j) * math.comb(order, j) * bernstein.bernsteinPoly(newI, newP, u)
+        start = max(0, i-newP)
+        end = min(i, order) + 1
+        for j in range(start, end):
+            newI = i - j
+            derB += np.power(-1, order+j) * math.comb(order, j) * bernstein.bernsteinPoly(newI, newP, u)
 
         if derB != 0 and order > 0:
             derB *= math.perm(p, order)
