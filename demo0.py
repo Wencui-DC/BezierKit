@@ -12,7 +12,7 @@ ctrlpts = ([0, 2, 15], [2, 2, 10], [2, 0, 5], [0, 0, 0])
 # create a bezier
 bezier = BezierKit.bezier(ctrlpts)
 # adjust the weights
-# bezier.weights = [1, 1/np.sqrt(2), 1, 2]
+bezier.weights = [1, 1/np.sqrt(2), 1, 2]
 
 
 ## sample2: plot a bezier
